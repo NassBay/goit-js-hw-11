@@ -28,7 +28,7 @@ form.addEventListener('submit', event => {
 
   fetch(`https://pixabay.com/api/?${searchParams}`)
     .then(response => {
-      loader.style.display = 'none';
+      // loader.style.display = 'none';
       if (!response.ok) {
         throw new Error(response.status);
       }
@@ -42,7 +42,7 @@ form.addEventListener('submit', event => {
     .then(data => {
       loader.style.display = 'none';
 
-      if (!data.hits.length) {
+      if (!data.hits || !data.hits.length) {
         iziToast.error({
           message:
             'Sorry, there are no images matching your search query. Please try again!',
@@ -54,22 +54,22 @@ form.addEventListener('submit', event => {
           position: 'topRight',
           maxWidth: 430,
         });
-      }
-      const imgs = data.hits.reduce(
-        (
-          html,
-          {
-            webformatURL,
-            largeImageURL,
-            tags,
-            likes,
-            views,
-            comments,
-            downloads,
-          }
-        ) =>
-          html +
-          `<li class="gallery-item">
+      } else {
+        const imgs = data.hits.reduce(
+          (
+            html,
+            {
+              webformatURL,
+              largeImageURL,
+              tags,
+              likes,
+              views,
+              comments,
+              downloads,
+            }
+          ) =>
+            html +
+            `<li class="gallery-item">
           <a class="gallery-link" href="${largeImageURL}">
            <img class="gallery-image"
            src="${webformatURL}"
@@ -83,17 +83,18 @@ form.addEventListener('submit', event => {
           <p>Downloads:<span>${downloads}</span></p>
           </div> 
         </li>`,
-        ''
-      );
+          ''
+        );
 
-      gallery.innerHTML = imgs;
+        gallery.innerHTML = imgs;
 
-      let modal = new simpleLightbox('ul.gallery a', {
-        captionDelay: 250,
-        captionsData: 'alt',
-      });
+        let modal = new simpleLightbox('ul.gallery a', {
+          captionDelay: 250,
+          captionsData: 'alt',
+        });
 
-      modal.refresh();
+        modal.refresh();
+      }
     })
     .catch(err => {
       loader.style.display = 'none';
